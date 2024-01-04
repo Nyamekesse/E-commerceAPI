@@ -11,8 +11,15 @@ namespace E_commerceAPI.Controllers
     [ApiController]
     public class ContactController(ApplicationDBContext context, IMapper mapper) : ControllerBase
     {
+        private List<string> listSubjects = ["Order Status", "Refund Request", "Job Application", "Other"];
         private readonly ApplicationDBContext _context = context;
         private readonly IMapper _mapper = mapper;
+
+        [HttpGet("subjects")]
+        public IActionResult GetSubjects()
+        {
+            return Ok(listSubjects);
+        }
 
         [HttpGet]
         public IActionResult GetContacts()
@@ -32,6 +39,11 @@ namespace E_commerceAPI.Controllers
         [HttpPost]
         public IActionResult CreateContact(ContactRequestDTO contactRequestDTO)
         {
+            if (!listSubjects.Contains(contactRequestDTO.Subject))
+            {
+                ModelState.AddModelError("Subject", "Please select a valid subject");
+                return BadRequest(ModelState);
+            }
             Contact contact = _mapper.Map<Contact>(contactRequestDTO);
             _context.Contacts.Add(contact);
             _context.SaveChanges();
@@ -41,6 +53,11 @@ namespace E_commerceAPI.Controllers
         [HttpPut("{id:int}")]
         public IActionResult UpdateContact(int id, ContactUpdateDTO contactUpdateDTO)
         {
+            if (!listSubjects.Contains(contactUpdateDTO.Subject))
+            {
+                ModelState.AddModelError("Subject", "Please select a valid subject");
+                return BadRequest(ModelState);
+            }
             var contact = _context.Contacts.AsNoTracking().FirstOrDefault(x => x.Id == id);
             if (contact == null) return NotFound();
             Contact contactToUpdate = _mapper.Map<Contact>(contactUpdateDTO);
