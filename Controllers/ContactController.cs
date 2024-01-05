@@ -10,7 +10,7 @@ namespace E_commerceAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ContactController(ApplicationDBContext context, IMapper mapper) : ControllerBase
+    public class ContactController(ApplicationDBContext context, IMapper mapper, EmailSender emailSender) : ControllerBase
     {
         private readonly ApplicationDBContext _context = context;
         private readonly IMapper _mapper = mapper;
@@ -56,7 +56,7 @@ namespace E_commerceAPI.Controllers
             string messageBody = "This is the details of the account created";
             string recipient = contact.Email;
 
-            EmailSender.SendEmail(subject: emailSubject, body: messageBody, receiver: recipient);
+            emailSender.SendEmail(subject: emailSubject, body: messageBody, receiver: recipient);
 
             return Ok(contact);
         }
