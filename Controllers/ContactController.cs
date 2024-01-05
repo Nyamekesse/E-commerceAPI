@@ -2,6 +2,7 @@
 using E_commerceAPI.Data;
 using E_commerceAPI.Models;
 using E_commerceAPI.Models.DTO;
+using E_commerceAPI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,11 +12,8 @@ namespace E_commerceAPI.Controllers
     [ApiController]
     public class ContactController(ApplicationDBContext context, IMapper mapper) : ControllerBase
     {
-
         private readonly ApplicationDBContext _context = context;
         private readonly IMapper _mapper = mapper;
-
-        public ApplicationDBContext Context => _context;
 
         [HttpGet("subjects")]
         public IActionResult GetSubjects()
@@ -34,7 +32,7 @@ namespace E_commerceAPI.Controllers
         [HttpGet("{id:int}")]
         public IActionResult GetContactById(int id)
         {
-            var contact = context.Contacts.Include(contact => contact.Subject).FirstOrDefault(contact => contact.Id == id);
+            var contact = _context.Contacts.Include(contact => contact.Subject).FirstOrDefault(contact => contact.Id == id);
             if (contact is null) return NotFound();
             return Ok(contact);
         }
@@ -53,6 +51,12 @@ namespace E_commerceAPI.Controllers
 
             _context.Contacts.Add(contact);
             _context.SaveChanges();
+
+            string emailSubject = "Account Created";
+            string messageBody = "This is the details of the account created";
+            string recipient = contact.Email;
+
+            EmailSender.SendEmail(subject: emailSubject, body: messageBody, receiver: recipient);
 
             return Ok(contact);
         }
