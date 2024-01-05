@@ -14,8 +14,7 @@ namespace E_commerceAPI.Models.DTO
 
         [MaxLength(20)]
         public string? Phone { get; set; }
-        [Required, MaxLength(50)]
-        public string Subject { get; set; } = "";
+        public int SubjectId { get; set; }
         [Required, MinLength(20), MaxLength(4000)]
         public string Message { get; set; } = "";
     }
