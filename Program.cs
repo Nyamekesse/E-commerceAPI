@@ -11,7 +11,7 @@ var dbPassword = Environment.GetEnvironmentVariable("DB_PASSWORD");
 var dbName = Environment.GetEnvironmentVariable("DB_NAME");
 var dbUserName = Environment.GetEnvironmentVariable("DB_USERNAME");
 
-if (string.IsNullOrEmpty(dbName) || string.IsNullOrEmpty(dbHost) || string.IsNullOrEmpty(dbPassword) || string.IsNullOrEmpty(dbUserName))
+if (string.IsNullOrEmpty(dbName) || string.IsNullOrEmpty(dbHost) || string.IsNullOrEmpty(dbPassword) || string.IsNullOrEmpty(dbUserName) || string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MAIL_GUN_API_KEY")) || string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MAILGUN_DOMAIN")))
 {
     Console.WriteLine("Provide all values for environment variables");
     return;
