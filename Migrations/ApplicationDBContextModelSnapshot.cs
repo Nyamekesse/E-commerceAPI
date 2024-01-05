@@ -57,12 +57,12 @@ namespace E_commerceAPI.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
 
-                    b.Property<string>("Subject")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                    b.Property<int>("SubjectId")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SubjectId");
 
                     b.ToTable("Contacts");
                 });
@@ -109,6 +109,53 @@ namespace E_commerceAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Products");
+                });
+
+            modelBuilder.Entity("E_commerceAPI.Models.Subject", b =>
+                {
+                    b.Property<int>("Id")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Subjects");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Name = "Order Status"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Name = "Refund Request"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Name = "Job Application"
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Name = "Other"
+                        });
+                });
+
+            modelBuilder.Entity("E_commerceAPI.Models.Contact", b =>
+                {
+                    b.HasOne("E_commerceAPI.Models.Subject", "Subject")
+                        .WithMany()
+                        .HasForeignKey("SubjectId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Subject");
                 });
 #pragma warning restore 612, 618
         }
