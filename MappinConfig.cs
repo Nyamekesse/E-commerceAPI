@@ -8,7 +8,7 @@ namespace E_commerceAPI
     {
         public MappinConfig()
         {
-            CreateMap<Contact, ContactRequestDTO>().ReverseMap();
+            CreateMap<Contact, ContactCreateDTO>().ReverseMap();
             CreateMap<Contact, ContactUpdateDTO>().ReverseMap();
         }
     }
