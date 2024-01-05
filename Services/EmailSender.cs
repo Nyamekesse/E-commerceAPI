@@ -2,21 +2,22 @@
 using RestSharp.Authenticators;
 namespace E_commerceAPI.Services
 {
-    public class EmailSender
+    public class EmailSender(IConfiguration configuration)
     {
+        private readonly string Domain = configuration.GetValue<string>("EmailConfigurationOptions:MailgunDomain")!;
         private static readonly string APIKey = Environment.GetEnvironmentVariable("MAIL_GUN_API_KEY")!;
-        private static readonly string Domain = Environment.GetEnvironmentVariable("MAILGUN_DOMAIN")!;
-        private const string BaseUri = "https://api.mailgun.net/v3";
-        private const string SenderDisplayName = "PhoenixTechVault";
-        private const string Tag = "new account";
-        public static RestResponse SendEmail(string subject, string body, string receiver)
+        private readonly string BaseUri = configuration.GetValue<string>("EmailConfigurationOptions:BaseUri")!;
+        private readonly string SenderDisplayName = configuration.GetValue<string>("EmailConfigurationOptions:DisplayName")!;
+        private readonly string Tag = configuration.GetValue<string>("EmailConfigurationOptions:Tag")!;
+
+        public RestResponse SendEmail(string subject, string body, string receiver)
         {
+
 
             RestClient client = new(new RestClientOptions(BaseUri)
             {
                 Authenticator = new HttpBasicAuthenticator("api", APIKey)
             });
-
 
             RestRequest request = new();
             request.AddParameter("domain", Domain, ParameterType.UrlSegment);
