@@ -10,6 +10,8 @@ namespace E_commerceAPI
         {
             CreateMap<Contact, ContactCreateDTO>().ReverseMap();
             CreateMap<Contact, ContactUpdateDTO>().ReverseMap();
+            CreateMap<Product, ProductCreateDTO>().ReverseMap();
+            CreateMap<Product, ProductUpdateDTO>().ReverseMap();
         }
     }
 }
