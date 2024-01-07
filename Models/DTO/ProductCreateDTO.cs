@@ -17,6 +17,6 @@ namespace E_commerceAPI.Models.DTO
         [MaxLength(1000)]
         public string? Description { get; set; }
         [Required]
-        public required IFormFile ImageFile { get; set; }
+        public IFormFile? ImageFile { get; set; }
     }
 }
