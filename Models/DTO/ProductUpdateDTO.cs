@@ -4,6 +4,7 @@ namespace E_commerceAPI.Models.DTO
 {
     public class ProductUpdateDTO
     {
+        public int Id { get; set; }
         [Required, MaxLength(50)]
         public string Name { get; set; } = "";
         [Required, MaxLength(50)]
