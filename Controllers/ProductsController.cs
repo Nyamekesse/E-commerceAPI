@@ -3,7 +3,6 @@ using E_commerceAPI.Data;
 using E_commerceAPI.Models;
 using E_commerceAPI.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace E_commerceAPI.Controllers
 {
@@ -17,7 +16,7 @@ namespace E_commerceAPI.Controllers
         [HttpGet]
         public IActionResult GetProducts()
         {
-            var products = _context.Products.FromSqlInterpolated($"SELECT * FROM Products").ToList();
+            var products = _context.Products.ToList();
             return Ok(products);
         }
 
@@ -25,8 +24,8 @@ namespace E_commerceAPI.Controllers
         public IActionResult GetProductById(int id)
         {
 
-            var product = _context.Products.FromSqlInterpolated($"SELECT * FROM Products WHERE Id={id}").FirstOrDefault();
-            if (product == null) { return NotFound(id); }
+            var product = _context.Products.FirstOrDefault(product => product.Id == id);
+            if (product == null) { return NotFound(); }
             return Ok(product);
         }
 
