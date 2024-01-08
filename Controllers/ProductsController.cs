@@ -90,5 +90,15 @@ namespace E_commerceAPI.Controllers
             _context.SaveChanges();
             return Ok(productToUpdate);
         }
+
+        [HttpDelete("{id}")]
+        public IActionResult DeleteProduct(int id)
+        {
+            var product = _context.Products.AsNoTracking().FirstOrDefault(product => product.Id == id);
+            if (product is null) return NotFound();
+            _context.Products.Remove(product);
+            _context.SaveChanges();
+            return Ok();
+        }
     }
 }
