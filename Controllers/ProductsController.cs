@@ -3,6 +3,7 @@ using E_commerceAPI.Data;
 using E_commerceAPI.Models;
 using E_commerceAPI.Models.DTO;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace E_commerceAPI.Controllers
 {
@@ -60,6 +61,34 @@ namespace E_commerceAPI.Controllers
             _context.SaveChanges();
 
             return Ok(newProduct);
+        }
+
+        [HttpPut("{id:int}")]
+        public IActionResult UpdateProduct(int id, [FromForm] ProductUpdateDTO updateDTO)
+        {
+            if (updateDTO == null) return BadRequest();
+            var product = _context.Products.AsNoTracking().FirstOrDefault(product => product.Id == id);
+            if (product == null) return NotFound();
+            Product productToUpdate = _mapper.Map<Product>(updateDTO);
+            if (updateDTO.ImageFile != null)
+            {
+                string fileName = productToUpdate.Id + Path.GetExtension(updateDTO.ImageFile.FileName);
+                string filePath = @"wwwroot\images\products\" + fileName;
+                var directoryLocation = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+                FileInfo file = new(directoryLocation);
+                if (file.Exists)
+                {
+                    file.Delete();
+                }
+                using (var fileStream = new FileStream(directoryLocation, FileMode.Create))
+                {
+                    updateDTO.ImageFile.CopyTo(fileStream);
+                }
+                productToUpdate.ImageFileName = fileName;
+            }
+            _context.Products.Update(productToUpdate);
+            _context.SaveChanges();
+            return Ok(productToUpdate);
         }
     }
 }
