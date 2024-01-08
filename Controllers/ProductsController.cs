@@ -30,13 +30,14 @@ namespace E_commerceAPI.Controllers
         }
 
         [HttpPost]
-        public IActionResult CreateProduct(ProductCreateDTO productDTO)
+        public IActionResult CreateProduct([FromForm] ProductCreateDTO productDTO)
         {
             Product newProduct = _mapper.Map<Product>(productDTO);
+            _context.Products.Add(newProduct);
+            _context.SaveChanges();
             if (productDTO.ImageFile != null)
             {
-
-                string fileName = newProduct.Id.ToString() + Path.GetExtension(productDTO.ImageFile.FileName);
+                string fileName = newProduct.Id + Path.GetExtension(productDTO.ImageFile.FileName);
                 string filePath = @"wwwroot\images\products\" + fileName;
                 var directoryLocation = Path.Combine(Directory.GetCurrentDirectory(), filePath);
                 FileInfo file = new(directoryLocation);
@@ -55,7 +56,7 @@ namespace E_commerceAPI.Controllers
                 newProduct.ImageFileName = "https://placehold.co/600x400/EEE/31343C";
             }
 
-            _context.Products.Add(newProduct);
+            _context.Products.Update(newProduct);
             _context.SaveChanges();
 
             return Ok(newProduct);
