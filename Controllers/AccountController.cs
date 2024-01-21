@@ -92,6 +92,44 @@ namespace E_commerceAPI.Controllers
             return Ok(response);
         }
 
+        [HttpPost("login")]
+        public IActionResult Login(string email, string password)
+        {
 
+            var user = context.Users.FirstOrDefault(u => u.Email == email);
+            if (user is null)
+            {
+                ModelState.AddModelError("Email", "The email address already exists");
+                return BadRequest(ModelState);
+            }
+            var passwordHasher = new PasswordHasher<User>();
+            var result = passwordHasher.VerifyHashedPassword(new User(), user.Password, password);
+            if (result == PasswordVerificationResult.Failed)
+            {
+                ModelState.AddModelError("Password", "Incorrect password");
+                return BadRequest(ModelState);
+            }
+
+            var jwt = CreateJWToken(user);
+            UserProfileDTO profile = new()
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
+                Role = user.Role,
+                CreatedAt = user.CreatedAt
+            };
+
+            var response = new
+            {
+                Token = jwt,
+                User = profile
+            };
+
+            return Ok(response);
+        }
     }
 }
