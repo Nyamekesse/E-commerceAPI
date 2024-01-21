@@ -1,4 +1,7 @@
-﻿using E_commerceAPI.Models;
+﻿using E_commerceAPI.Data;
+using E_commerceAPI.Models;
+using E_commerceAPI.Models.DTO;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -9,7 +12,7 @@ namespace E_commerceAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController(IConfiguration configuration) : ControllerBase
+    public class AccountController(IConfiguration configuration, ApplicationDBContext context) : ControllerBase
     {
 
         string secretKey = Environment.GetEnvironmentVariable("SECRET")!;
@@ -37,6 +40,57 @@ namespace E_commerceAPI.Controllers
             return jwt;
         }
 
+        [HttpPost("register")]
+        public IActionResult Register(UserCreateDTO userCreateDTO)
+        {
+
+            var emailCount = context.Users.Count(u => u.Email == userCreateDTO.Email);
+            if (emailCount > 0)
+            {
+                ModelState.AddModelError("Email", "The email address already exists");
+                return BadRequest(ModelState);
+            }
+
+            var passwordHasher = new PasswordHasher<User>();
+            var encryptedPassword = passwordHasher.HashPassword(new User(), userCreateDTO.Password);
+
+            User user = new()
+            {
+                FirstName = userCreateDTO.FirstName,
+                LastName = userCreateDTO.LastName,
+                Email = userCreateDTO.Email,
+                Phone = userCreateDTO.Phone ?? "",
+                Address = userCreateDTO.Address,
+                Password = encryptedPassword,
+                Role = "client",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            context.Users.Add(user);
+            context.SaveChanges();
+
+            var jwt = CreateJWToken(user);
+
+            UserProfileDTO profile = new()
+            {
+                Id = user.Id,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                Phone = user.Phone,
+                Address = user.Address,
+                Role = user.Role,
+                CreatedAt = user.CreatedAt
+            };
+
+            var response = new
+            {
+                Token = jwt,
+                User = profile
+            };
+
+            return Ok(response);
+        }
 
 
     }
