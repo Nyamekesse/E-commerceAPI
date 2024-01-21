@@ -93,17 +93,17 @@ namespace E_commerceAPI.Controllers
         }
 
         [HttpPost("login")]
-        public IActionResult Login(string email, string password)
+        public IActionResult Login([FromBody] UserLoginDTO userLoginDTO)
         {
 
-            var user = context.Users.FirstOrDefault(u => u.Email == email);
+            var user = context.Users.FirstOrDefault(u => u.Email == userLoginDTO.Email);
             if (user is null)
             {
                 ModelState.AddModelError("Email", "The email address already exists");
                 return BadRequest(ModelState);
             }
             var passwordHasher = new PasswordHasher<User>();
-            var result = passwordHasher.VerifyHashedPassword(new User(), user.Password, password);
+            var result = passwordHasher.VerifyHashedPassword(new User(), user.Password, userLoginDTO.Password);
             if (result == PasswordVerificationResult.Failed)
             {
                 ModelState.AddModelError("Password", "Incorrect password");
