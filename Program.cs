@@ -1,9 +1,12 @@
 using E_commerceAPI;
 using E_commerceAPI.Data;
 using E_commerceAPI.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,7 +46,20 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<EmailSender>();
 builder.Services.AddAutoMapper(typeof(MappinConfig));
 builder.Services.AddDbContext<ApplicationDBContext>(option => { option.UseNpgsql($"Host={dbHost}; Database={dbName}; Username={dbUserName}; Password={dbPassword}"); });
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
 
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["JWTConfig:Issuer"],
+        ValidAudience = builder.Configuration["JWTConfig:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET")))
+    };
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
