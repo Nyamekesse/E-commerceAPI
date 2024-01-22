@@ -1,6 +1,7 @@
 ﻿using E_commerceAPI.Data;
 using E_commerceAPI.Models;
 using E_commerceAPI.Models.DTO;
+using E_commerceAPI.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +14,7 @@ namespace E_commerceAPI.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController(IConfiguration configuration, ApplicationDBContext context) : ControllerBase
+    public class AccountController(IConfiguration configuration, ApplicationDBContext context, EmailSender emailSender) : ControllerBase
     {
 
         readonly string secretKey = Environment.GetEnvironmentVariable("SECRET")!;
@@ -154,5 +155,52 @@ namespace E_commerceAPI.Controllers
         {
             return Ok("You are Authorized.");
         }
+
+        [HttpPost("forgot-password")]
+        public IActionResult ForgotPassword([FromBody] string email)
+
+
+        {
+
+            var user = context.Users.FirstOrDefault(u => u.Email == email);
+            if (user == null) return NotFound();
+
+            var oldPasswordReset = context.PasswordResets.FirstOrDefault(r => r.Email == email);
+            if (oldPasswordReset is not null)
+            {
+                context.Remove(oldPasswordReset);
+            }
+
+            string token = Guid.NewGuid().ToString() + "-" + Guid.NewGuid().ToString();
+            var passwordReset = new PasswordReset()
+            {
+                Email = email,
+                Token = token,
+                CreatedAt = DateTime.UtcNow
+            };
+            context.PasswordResets.Add(passwordReset);
+            context.SaveChanges();
+
+            string emailSubject = "Password Reset";
+            string messageBody = $"We received your password reset request please copy the following token and paste it in the password reset box\n\nToken: {token}";
+            string recipient = email;
+
+            emailSender.SendEmail(subject: emailSubject, body: messageBody, receiver: recipient);
+
+            return Ok();
+        }
+
+        [HttpPost("reset-password")]
+        public IActionResult ResetPassword(string token, string password)
+        {
+            var passwordReset = context.PasswordResets.FirstOrDefault(r => r.Token == token);
+            if (passwordReset is null)
+            {
+                ModelState.AddModelError("Token", "Wrong or expired token");
+                return BadRequest(ModelState);
+            }
+            return Ok();
+        }
     }
+
 }
