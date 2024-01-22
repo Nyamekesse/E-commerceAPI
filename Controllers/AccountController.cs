@@ -1,6 +1,7 @@
 ﻿using E_commerceAPI.Data;
 using E_commerceAPI.Models;
 using E_commerceAPI.Models.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -15,7 +16,7 @@ namespace E_commerceAPI.Controllers
     public class AccountController(IConfiguration configuration, ApplicationDBContext context) : ControllerBase
     {
 
-        string secretKey = Environment.GetEnvironmentVariable("SECRET")!;
+        readonly string secretKey = Environment.GetEnvironmentVariable("SECRET")!;
         private string CreateJWToken(User user)
         {
 
@@ -130,6 +131,28 @@ namespace E_commerceAPI.Controllers
             };
 
             return Ok(response);
+        }
+
+
+        [Authorize]
+        [HttpGet("authorize-admin")]
+        public IActionResult AuthorizeAuthenticatedUsers()
+        {
+            return Ok("You are Authorized.");
+        }
+
+        [Authorize(Roles = "admin")]
+        [HttpGet("authorize-authenticated-users")]
+        public IActionResult AuthorizeAdmin()
+        {
+            return Ok("You are Authorized.");
+        }
+
+        [Authorize(Roles = "admin, seller")]
+        [HttpGet("authorize-admin-seller")]
+        public IActionResult AuthorizeAdminSeller()
+        {
+            return Ok("You are Authorized.");
         }
     }
 }
